@@ -36,9 +36,9 @@ def run_web_server():
 # تشغيل الخادم الوهمي في الخلفية
 threading.Thread(target=run_web_server, daemon=True).start()
 
-API_ID = 24400989
-API_HASH = '8a682c7664872355902f07d127b494d9'
-BOT_TOKEN = '8774584319:AAHHMQ3CVRcsi0qumvlkKefjlu6MYEf3Iws'
+API_ID = 34474141
+API_HASH = '5ae079a54f32170ddc5b2ca52ecd2de6'
+BOT_TOKEN = '8866078656:AAFrRZsiRXAb1nFzN9DFNIOrxpka1Fe0yU0'
 ADMIN_USERNAME = '@italsory'
 
 user_attempts = {}
@@ -49,7 +49,7 @@ COOLDOWN_SECONDS = COOLDOWN_HOURS * 3600
 user_target_channel = {}
 user_mode = {}
 
-USER_SESSION_STRING = "1BVtsOL8Bu2YAt-dU42Fe8mIbPoH2jEZJQdXs7nMRxIhYJVk0PpiKYH4-acUI-DMeKuBGAQ5taqmcWF7HvA1TuqCPzn8LNp6mNqakfC-rZ9jjFyjuEHtM_ZVr1HYJ14vxGIlmm9V4ZtZM30yOWWROsxr4gihwoTD9I4_ehctIbBb-n2cQu61gZT66rIiGEqVks5VhFTpzD0hrIgmTlBWDwhJXiSL8NN2EPGwZe5IHa_099VHQuQNSj8wv1LJnlQH_wRdnYIidcu9IkfSunEKJeVTdjNLBr8wVpOpkfP2C9Fh6KoXRUx2yHHxK72SIorz2vnkfxMqc5Aw1TDvhy8PTsKYTME2wMe0="
+USER_SESSION_STRING = "1BVtsOKABu5ftePWrAd7ztvRF8rHJ1mDpqWgiduxIKD-cZofCKZ AMWDwvNSPOVZb28hnVVSfiDkVNOAVGch9VYeeaRSvG1ePUYInsabSfKM1j_MBUm7yX6 unU5uRsqm2n9oUwCZ83DHd1utz8-nbJBTbw1Q4joNs6BKn2_8p099vCIgq1jmoKCz4D C549kSJAnehmgq9_bZnemn1LF3s4mEZYTBKuVZ38kwxs_6pqc-or9FvBFlZFBdefeiY -lrWqOixIrX-yJJCAyXnSR1J05Ax55UuMpSTgsj3i0U0eFKV_vxWGs_dQ6cDHHT6KV_ 2yjlk6GheWZKbjNk1Y07tSHlP0zl2tz-A="
 
 user_client = TelegramClient(StringSession(USER_SESSION_STRING), API_ID, API_HASH)
 bot_client = TelegramClient('bot_session', API_ID, API_HASH)
