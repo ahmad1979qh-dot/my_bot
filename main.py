@@ -1,7 +1,9 @@
 import sys
 import subprocess
 import asyncio
-import time
+import os
+from http.server import HTTPServer, BaseHTTPRequestHandler
+import threading
 
 def auto_install(package_name):
     subprocess.check_call([sys.executable, "-m", "pip", "install", package_name])
@@ -9,14 +11,25 @@ def auto_install(package_name):
 try:
     from telethon import TelegramClient, events
     from telethon.sessions import StringSession
-    from telethon.tl.functions.channels import JoinChannelRequest
-    from telethon.tl.types import ChannelParticipantAdmin
 except ImportError:
     auto_install("telethon")
     from telethon import TelegramClient, events
     from telethon.sessions import StringSession
-    from telethon.tl.functions.channels import JoinChannelRequest
-    from telethon.tl.types import ChannelParticipantAdmin
+
+# خادم ويب وهمي لإبقاء منفذ Render مفتوحاً ومنع إيقاف السيرفر
+class SimpleHandler(BaseHTTPRequestHandler):
+    def do_GET(self):
+        self.send_response(200)
+        self.end_headers()
+        self.wfile.write(b"Bot is running 24/7!")
+
+def run_web_server():
+    port = int(os.environ.get("PORT", 10000))
+    server = HTTPServer(('0.0.0.0', port), SimpleHandler)
+    server.serve_forever()
+
+# بدء خادم الويب في خلفية الكود
+threading.Thread(target=run_web_server, daemon=True).start()
 
 API_ID = 24400989
 API_HASH = '8a682c7664872355902f07d127b494d9'
