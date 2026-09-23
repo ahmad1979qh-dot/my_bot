@@ -19,21 +19,21 @@ except ImportError:
     from telethon import TelegramClient, events, Button
     from telethon.sessions import StringSession
 
-# --- إعداد خادم الويب الوهمي لمنع إغلاق الخدمة على Render ---
+# --- خادم الويب الأساسي لإرضاء Render ---
 class SimpleHandler(BaseHTTPRequestHandler):
     def do_GET(self):
         self.send_response(200)
         self.end_headers()
         self.wfile.write(b"Bot is active and running 24/7!")
     def log_message(self, format, *args):
-        return # إيقاف طباعة تفاصيل الويب المتكررة في السجلات لتصبح نظيفة
+        return
 
 def run_web_server():
     port = int(os.environ.get("PORT", 10000))
     server = HTTPServer(('0.0.0.0', port), SimpleHandler)
     server.serve_forever()
 
-# تشغيل خادم الويب فوراً في الخلفية
+# تشغيل الويب في الخلفية
 threading.Thread(target=run_web_server, daemon=True).start()
 
 # --- بيانات التوثيق ---
@@ -55,7 +55,6 @@ user_client = TelegramClient(StringSession(USER_SESSION_STRING), API_ID, API_HAS
 bot_client = TelegramClient('bot_session', API_ID, API_HASH)
 
 user_start_stats = {}
-user_mode = {}
 
 @bot_client.on(events.NewMessage(pattern='/start'))
 async def start_handler(event):
@@ -87,50 +86,25 @@ async def start_handler(event):
     )
     await event.respond(welcome_message, buttons=reply_keyboard)
 
-@bot_client.on(events.NewMessage)
-async def handle_incoming_messages(event):
-    text = event.text.strip() if event.text else ""
-    if not text or text.startswith('/start'):
-        return
-    user_id = event.sender_id
-
-    if text == "📝 كشف":
-        user_mode[user_id] = "admins"
-        await event.respond("📝 **تم اختيار وضع [كشف المشرفين والمالك].**\nأرسل معرف القناة الآن:")
-        return
-
-    if text == "🛑 مخالفات":
-        user_mode[user_id] = "violations"
-        await event.respond("🛑 **تم اختيار وضع [فحص المخالفات].**\nأرسل معرف القناة الآن:")
-        return
-
-    if text.startswith('@'):
-        await event.respond(f"⏳ جاري معالجة الطلب للقناة `{text}`...")
-        try:
-            channel_entity = await user_client.get_entity(text)
-            await event.respond(f"✅ تم العثور على القناة بنجاح وسيبدأ الفحص.")
-        except Exception as e:
-            await event.respond(f"❌ خطأ أثناء جلب القناة: {e}")
-
 async def main():
-    print("🔥 جاري تشغيل العميل والبوت...", flush=True)
+    print("🔥 جاري بدء الاتصال...", flush=True)
     await user_client.start()
-    print("✅ تم تسجيل دخول الحساب الوهمي بنجاح!", flush=True)
+    print("✅ الحساب الوهمي يعمل بنجاح!", flush=True)
     
     await bot_client.start(bot_token=BOT_TOKEN)
-    print("✅ تم بدء تشغيل البوت بنجاح!", flush=True)
+    print("✅ البوت يعمل بنجاح!", flush=True)
     
     try:
         await bot_client.delete_webhook()
     except Exception:
         pass
 
-    print("🚀 البوت يعمل الآن ويستقبل الرسائل بنجاح!", flush=True)
+    print("🚀 البوت جاهز تماماً ويستقبل الرسائل!", flush=True)
     await asyncio.gather(
         user_client.run_until_disconnected(),
         bot_client.run_until_disconnected()
     )
 
 if __name__ == "__main__":
-    asyncio.run(asyncio.get_event_loop().run_until_complete(main()))
+    asyncio.run(main())
     
