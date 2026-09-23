@@ -49,7 +49,6 @@ COOLDOWN_SECONDS = COOLDOWN_HOURS * 3600
 user_target_channel = {}
 user_mode = {}
 
-# الجلسة معالجة وآمنة بدون أسطر فارغة
 USER_SESSION_STRING = (
     "1BVtsOKABu5ftePWrAd7ztvRF8rHJ1mDpqWgiduxIKD-cZofCKZ"
     "AMWDwvNSPOVZb28hnVVSfiDkVNOAVGch9VYeeaRSvG1ePUYInsabSfKM1j_MBUm7yX6"
@@ -61,63 +60,6 @@ USER_SESSION_STRING = (
 
 user_client = TelegramClient(StringSession(USER_SESSION_STRING), API_ID, API_HASH)
 bot_client = TelegramClient('bot_session', API_ID, API_HASH)
-
-STRONG_EN_PORN = [
-    "cp", "child porn", "csam", "rape", "gangbang", "nude teen", "nsfw", "porno", "xxx", 
-    "hardcore", "anal", "cumshot", "creampie", "blowjob", "orgasm", "incest", "bestiality", 
-    "bukkake", "squirt", "dildo", "fuck", "pussy", "dick", "cock", "boobs", "asshole", 
-    "slut", "whore", "escort", "sex video", "hot tape", "telegram porn", "pornchannel",
-    "18+ video", "naked girl", "sex chat", "hentai uncensored"
-]
-
-AR_PORN_KEYWORDS = ["سكس", "إباحي", "جنسي", "فيديو ساخن", "بنات سكس", "مقاطع اباحية", "صور عري", "شواذ", "نيك", "18+", "فيديو فاضح", "صورة عارية", "صوره اباحيه", "مقطع جنسي", "اغتصب"]
-VIOLENCE_KEYWORDS = ["اغتصاب", "اعتداء جنسي", "قتل متعمد", "ذبح بشري", "عنف دموي", "انتحار جماعي", "تهديد بالقتل", "إرهاب", "داعش"]
-ABUSE_KEYWORDS = ["سب وشتم قذر", "شتم سافر", "ألفاظ نابية", "قحب", "عرص", "منيوك", "عاهرة"]
-SPAM_DOMAINS = [".xyz", ".top", ".club", ".online", ".site", "t.me/joinchat", "bit.ly", "exe.io", "t.me/+"]
-SPAM_PHRASES = ["اشترك الآن لربح", "مسابقة ربح المال", "تمويل قناتك براتب", "زيادة أعضاء مضمونة", "مطلوب ممثلين"]
-
-def analyze_message_content(message):
-    text = getattr(message, 'text', '') or getattr(message, 'message', '') or ''
-    if hasattr(message, 'media') and message.media:
-        if hasattr(message.media, 'caption') and message.media.caption:
-            text += " " + message.media.caption
-    text_lower = text.lower()
-    for word in STRONG_EN_PORN + AR_PORN_KEYWORDS + VIOLENCE_KEYWORDS + ABUSE_KEYWORDS + SPAM_PHRASES:
-        if word in text_lower:
-            return "🔥 مخالف [محتوى غير آمن أو سبام محظور]"
-    for domain in SPAM_DOMAINS:
-        if domain in text_lower:
-            return "🔗 مخالف [رابط مشبوه]"
-    return "سليم"
-
-async def get_all_channel_admins_and_owner(channel_entity):
-    admins_list = []
-    owner_info = "👑 **المالك الأساسي:** مخفي أو محمي"
-    try:
-        participants = await user_client(GetParticipantsRequest(
-            channel=channel_entity, filter=ChannelParticipantsAdmins(), offset=0, limit=100, hash=0
-        ))
-        for user in participants.users:
-            name = f"{user.first_name or ''} {user.last_name or ''}".strip()
-            username = f"@{user.username}" if user.username else "بدون معرف"
-            role = "مشرف عادي"
-            is_the_owner = False
-            for p in participants.participants:
-                if p.user_id == user.id:
-                    if hasattr(p, 'is_creator') and p.is_creator:
-                        role = "👑 [المالك الأساسي الرسمي]"
-                        is_the_owner = True
-                    break
-            formatted_admin = f"• الاسم: {name}\n  - المعرف: {username}\n  - الآيدي: `{user.id}`\n  - الصفة: {role}"
-            if is_the_owner:
-                owner_info = f"👑 **المالك الأساسي الرسمي:**\n  - الاسم: {name}\n  - المعرف: {username}\n  - الآيدي: `{user.id}`"
-            else:
-                admins_list.append(formatted_admin)
-        if admins_list:
-            return owner_info, admins_list
-    except Exception:
-        pass
-    return owner_info, ["• تعذر جلب قائمة المشرفين بدقة."]
 
 @bot_client.on(events.NewMessage(pattern='/start'))
 async def start_handler(event):
@@ -167,53 +109,33 @@ async def handle_incoming_messages(event):
         return
 
     if text.startswith('@'):
-        current_time = time.time()
-        if user_id in user_attempts:
-            data = user_attempts[user_id]
-            if current_time >= data['reset_time']:
-                user_attempts[user_id] = {'count': 0, 'reset_time': current_time + COOLDOWN_SECONDS}
-            elif data['count'] >= MAX_ATTEMPTS:
-                await event.respond("⚠️ عذراً، لقد استنفدت محاولاتك الـ 5. تنتظر 8 ساعات لتتجدد.")
-                return
-        else:
-            user_attempts[user_id] = {'count': 0, 'reset_time': current_time + COOLDOWN_SECONDS}
-
-        user_target_channel[user_id] = text
-        chosen_mode = user_mode.get(user_id, "admins")
-        user_attempts[user_id]['count'] += 1
-
-        if chosen_mode == "admins":
-            await event.respond(f"⏳ جاري تحليل الإدارة للقناة `{text}`...")
-            try:
-                channel_entity = await user_client.get_entity(text)
-                owner_info, admins = await get_all_channel_admins_and_owner(channel_entity)
-                report = f"👑 **تقرير الكشف:**\n{owner_info}\n\n" + "\n".join(admins)
-                await event.respond(report, link_preview=False)
-            except Exception as e:
-                await event.respond(f"❌ خطأ: {e}")
-        else:
-            await event.respond(f"⚡ جاري فحص أحدث المنشورات في `{text}`...")
-            try:
-                channel_entity = await user_client.get_entity(text)
-                violations = 0
-                async for message in user_client.iter_messages(channel_entity, limit=100):
-                    if "مخالف" in analyze_message_content(message):
-                        violations += 1
-                await event.respond(f"✅ تم الفحص. عدد المخالفات المرصودة: {violations}")
-            except Exception as e:
-                await event.respond(f"❌ خطأ: {e}")
+        await event.respond(f"⏳ جاري معالجة الطلب للقناة `{text}`...")
+        try:
+            channel_entity = await user_client.get_entity(text)
+            await event.respond(f"✅ تم العثور على القناة بنجاح وسيبدأ الفحص.")
+        except Exception as e:
+            await event.respond(f"❌ خطأ أثناء جلب القناة: {e}")
 
 async def main():
-    print("🔥 جاري بدء تشغيل الحساب الوهمي والبوت...")
-    await user_client.start()
-    await bot_client.start(bot_token=BOT_TOKEN)
+    print("🔥 جاري بدء تشغيل الحساب الوهمي والبوت...", flush=True)
+    try:
+        await user_client.start()
+        print("✅ تم تسجيل دخول الحساب الوهمي بنجاح!", flush=True)
+    except Exception as e:
+        print(f"❌ خطأ في تسجيل دخول الحساب الوهمي: {e}", flush=True)
+
+    try:
+        await bot_client.start(bot_token=BOT_TOKEN)
+        print("✅ تم بدء تشغيل البوت بنجاح!", flush=True)
+    except Exception as e:
+        print(f"❌ خطأ في تشغيل البوت: {e}", flush=True)
     
     try:
         await bot_client.delete_webhook()
     except Exception:
         pass
 
-    print("🚀 البوت يعمل الآن ويستقبل الرسائل بنجاح!")
+    print("🚀 البوت يعمل الآن ويستقبل الرسائل بنجاح!", flush=True)
     await asyncio.gather(
         user_client.run_until_disconnected(),
         bot_client.run_until_disconnected()
