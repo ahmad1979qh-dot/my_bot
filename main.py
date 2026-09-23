@@ -49,7 +49,15 @@ COOLDOWN_SECONDS = COOLDOWN_HOURS * 3600
 user_target_channel = {}
 user_mode = {}
 
-USER_SESSION_STRING = "1BVtsOKABu5ftePWrAd7ztvRF8rHJ1mDpqWgiduxIKD-cZofCKZ AMWDwvNSPOVZb28hnVVSfiDkVNOAVGch9VYeeaRSvG1ePUYInsabSfKM1j_MBUm7yX6 unU5uRsqm2n9oUwCZ83DHd1utz8-nbJBTbw1Q4joNs6BKn2_8p099vCIgq1jmoKCz4D C549kSJAnehmgq9_bZnemn1LF3s4mEZYTBKuVZ38kwxs_6pqc-or9FvBFlZFBdefeiY -lrWqOixIrX-yJJCAyXnSR1J05Ax55UuMpSTgsj3i0U0eFKV_vxWGs_dQ6cDHHT6KV_ 2yjlk6GheWZKbjNk1Y07tSHlP0zl2tz-A="
+# الجلسة معالجة وآمنة بدون أسطر فارغة
+USER_SESSION_STRING = (
+    "1BVtsOKABu5ftePWrAd7ztvRF8rHJ1mDpqWgiduxIKD-cZofCKZ"
+    "AMWDwvNSPOVZb28hnVVSfiDkVNOAVGch9VYeeaRSvG1ePUYInsabSfKM1j_MBUm7yX6"
+    "unU5uRsqm2n9oUwCZ83DHd1utz8-nbJBTbw1Q4joNs6BKn2_8p099vCIgq1jmoKCz4D"
+    "C549kSJAnehmgq9_bZnemn1LF3s4mEZYTBKuVZ38kwxs_6pqc-or9FvBFlZFBdefeiY"
+    "-lrWqOixIrX-yJJCAyXnSR1J05Ax55UuMpSTgsj3i0U0eFKV_vxWGs_dQ6cDHHT6KV_"
+    "2yjlk6GheWZKbjNk1Y07tSHlP0zl2tz-A="
+)
 
 user_client = TelegramClient(StringSession(USER_SESSION_STRING), API_ID, API_HASH)
 bot_client = TelegramClient('bot_session', API_ID, API_HASH)
