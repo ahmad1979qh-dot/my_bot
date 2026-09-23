@@ -199,6 +199,13 @@ async def main():
     print("🔥 جاري بدء تشغيل الحساب الوهمي والبوت...")
     await user_client.start()
     await bot_client.start(bot_token=BOT_TOKEN)
+    
+    # حذف أي Webhook قديم متبقي للتوكن
+    try:
+        await bot_client.delete_webhook()
+    except Exception:
+        pass
+
     print("🚀 البوت يعمل الآن ويستقبل الرسائل بنجاح!")
     await asyncio.gather(
         user_client.run_until_disconnected(),
