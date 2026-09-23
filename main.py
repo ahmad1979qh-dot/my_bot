@@ -38,7 +38,7 @@ threading.Thread(target=run_web_server, daemon=True).start()
 
 API_ID = 24400989
 API_HASH = '8a682c7664872355902f07d127b494d9'
-BOT_TOKEN = '8774584319:AAGJ8kMyYUGrpYDpLJRARH9yI2-0_a9B7bg'
+BOT_TOKEN = '8774584319:AAHHMQ3CVRcsi0qumvlkKefjlu6MYEf3Iws'
 ADMIN_USERNAME = '@italsory'
 
 user_attempts = {}
@@ -200,7 +200,6 @@ async def main():
     await user_client.start()
     await bot_client.start(bot_token=BOT_TOKEN)
     
-    # حذف أي Webhook قديم متبقي للتوكن
     try:
         await bot_client.delete_webhook()
     except Exception:
