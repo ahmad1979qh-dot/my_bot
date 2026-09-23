@@ -1,53 +1,46 @@
 import sys
 import subprocess
 import asyncio
-import time
 import os
 from http.server import HTTPServer, BaseHTTPRequestHandler
 import threading
 
 def auto_install(package_name):
-    subprocess.check_call([sys.executable, "-m", "pip", "install", package_name])
+    try:
+        subprocess.check_call([sys.executable, "-m", "pip", "install", package_name])
+    except Exception:
+        pass
 
 try:
     from telethon import TelegramClient, events, Button
     from telethon.sessions import StringSession
-    from telethon.tl.functions.channels import GetParticipantsRequest
-    from telethon.tl.types import ChannelParticipantsAdmins
 except ImportError:
     auto_install("telethon")
     from telethon import TelegramClient, events, Button
     from telethon.sessions import StringSession
-    from telethon.tl.functions.channels import GetParticipantsRequest
-    from telethon.tl.types import ChannelParticipantsAdmins
 
-# خادم ويب وهمي لإرضاء متطلبات Render لفتح المنفذ
+# --- إعداد خادم الويب الوهمي لمنع إغلاق الخدمة على Render ---
 class SimpleHandler(BaseHTTPRequestHandler):
     def do_GET(self):
         self.send_response(200)
         self.end_headers()
-        self.wfile.write(b"Bot is running 24/7!")
+        self.wfile.write(b"Bot is active and running 24/7!")
+    def log_message(self, format, *args):
+        return # إيقاف طباعة تفاصيل الويب المتكررة في السجلات لتصبح نظيفة
 
 def run_web_server():
     port = int(os.environ.get("PORT", 10000))
     server = HTTPServer(('0.0.0.0', port), SimpleHandler)
     server.serve_forever()
 
-# تشغيل الخادم الوهمي في الخلفية
+# تشغيل خادم الويب فوراً في الخلفية
 threading.Thread(target=run_web_server, daemon=True).start()
 
+# --- بيانات التوثيق ---
 API_ID = 34474141
 API_HASH = '5ae079a54f32170ddc5b2ca52ecd2de6'
 BOT_TOKEN = '8866078656:AAFrRZsiRXAb1nFzN9DFNIOrxpka1Fe0yU0'
 ADMIN_USERNAME = '@italsory'
-
-user_attempts = {}
-user_start_stats = {}
-MAX_ATTEMPTS = 5
-COOLDOWN_HOURS = 8
-COOLDOWN_SECONDS = COOLDOWN_HOURS * 3600
-user_target_channel = {}
-user_mode = {}
 
 USER_SESSION_STRING = (
     "1BVtsOKABu5ftePWrAd7ztvRF8rHJ1mDpqWgiduxIKD-cZofCKZ"
@@ -60,6 +53,9 @@ USER_SESSION_STRING = (
 
 user_client = TelegramClient(StringSession(USER_SESSION_STRING), API_ID, API_HASH)
 bot_client = TelegramClient('bot_session', API_ID, API_HASH)
+
+user_start_stats = {}
+user_mode = {}
 
 @bot_client.on(events.NewMessage(pattern='/start'))
 async def start_handler(event):
@@ -117,18 +113,12 @@ async def handle_incoming_messages(event):
             await event.respond(f"❌ خطأ أثناء جلب القناة: {e}")
 
 async def main():
-    print("🔥 جاري بدء تشغيل الحساب الوهمي والبوت...", flush=True)
-    try:
-        await user_client.start()
-        print("✅ تم تسجيل دخول الحساب الوهمي بنجاح!", flush=True)
-    except Exception as e:
-        print(f"❌ خطأ في تسجيل دخول الحساب الوهمي: {e}", flush=True)
-
-    try:
-        await bot_client.start(bot_token=BOT_TOKEN)
-        print("✅ تم بدء تشغيل البوت بنجاح!", flush=True)
-    except Exception as e:
-        print(f"❌ خطأ في تشغيل البوت: {e}", flush=True)
+    print("🔥 جاري تشغيل العميل والبوت...", flush=True)
+    await user_client.start()
+    print("✅ تم تسجيل دخول الحساب الوهمي بنجاح!", flush=True)
+    
+    await bot_client.start(bot_token=BOT_TOKEN)
+    print("✅ تم بدء تشغيل البوت بنجاح!", flush=True)
     
     try:
         await bot_client.delete_webhook()
@@ -142,5 +132,5 @@ async def main():
     )
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    asyncio.run(asyncio.get_event_loop().run_until_complete(main()))
     
