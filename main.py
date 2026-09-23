@@ -2,9 +2,6 @@ import sys
 import subprocess
 import asyncio
 import time
-import os
-from http.server import HTTPServer, BaseHTTPRequestHandler
-import threading
 
 def auto_install(package_name):
     subprocess.check_call([sys.executable, "-m", "pip", "install", package_name])
@@ -20,20 +17,6 @@ except ImportError:
     from telethon.sessions import StringSession
     from telethon.tl.functions.channels import GetParticipantsRequest
     from telethon.tl.types import ChannelParticipantsAdmins
-
-# خادم ويب وهمي لإبقاء منفذ Render مفتوحاً
-class SimpleHandler(BaseHTTPRequestHandler):
-    def do_GET(self):
-        self.send_response(200)
-        self.end_headers()
-        self.wfile.write(b"Bot is running 24/7!")
-
-def run_web_server():
-    port = int(os.environ.get("PORT", 10000))
-    server = HTTPServer(('0.0.0.0', port), SimpleHandler)
-    server.serve_forever()
-
-threading.Thread(target=run_web_server, daemon=True).start()
 
 API_ID = 24400989
 API_HASH = '8a682c7664872355902f07d127b494d9'
