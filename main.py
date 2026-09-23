@@ -54,7 +54,7 @@ user_mode = {}
 USER_SESSION_STRING = "1BVtsOL8Bu2YAt-dU42Fe8mIbPoH2jEZJQdXs7nMRxIhYJVk0PpiKYH4-acUI-DMeKuBGAQ5taqmcWF7HvA1TuqCPzn8LNp6mNqakfC-rZ9jjFyjuEHtM_ZVr1HYJ14vxGIlmm9V4ZtZM30yOWWROsxr4gihwoTD9I4_ehctIbBb-n2cQu61gZT66rIiGEqVks5VhFTpzD0hrIgmTlBWDwhJXiSL8NN2EPGwZe5IHa_099VHQuQNSj8wv1LJnlQH_wRdnYIidcu9IkfSunEKJeVTdjNLBr8wVpOpkfP2C9Fh6KoXRUx2yHHxK72SIorz2vnkfxMqc5Aw1TDvhy8PTsKYTME2wMe0="
 
 user_client = TelegramClient(StringSession(USER_SESSION_STRING), API_ID, API_HASH)
-bot_client = TelegramClient(StringSession(), API_ID, API_HASH)
+bot_client = TelegramClient('bot_session', API_ID, API_HASH)
 
 STRONG_EN_PORN = [
     "cp", "child porn", "csam", "rape", "gangbang", "nude teen", "nsfw", "porno", "xxx", 
@@ -292,4 +292,4 @@ async def main():
 
 if __name__ == "__main__":
     asyncio.run(main())
-                        
+    
